@@ -15,11 +15,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Set up Docker Compose
-        run: |
-          curl -L https://github.com/docker/compose/releases/download/1.11.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
-          chmod +x /usr/local/bin/docker-compose
       - name: Test
         run: docker-compose run --rm app sh -c "python3 manage.py test"
       - name: Lint

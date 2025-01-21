@@ -43,17 +43,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-# is it also possible to use ModelViewSet
-# idk why the tutorial uses GenericViewSet
-# in combination with mixins this time
-class TagViewSet(mixins.ListModelMixin,
-                 mixins.UpdateModelMixin,
-                 mixins.DestroyModelMixin,
-                 viewsets.GenericViewSet):
-    """Manage tags in the database."""
 
-    serializer_class = serializers.TagSerializer
-    queryset = Tag.objects.all()
+# because a lot of code was duplicated in tag and ingredient
+# viewsets and we avoid this by using inheritence from
+# a base class that we wrote.
+class BaseRecipeAttrViewSet(mixins.ListModelMixin,
+                            mixins.UpdateModelMixin,
+                            mixins.DestroyModelMixin,
+                            viewsets.GenericViewSet):
+    """Base ViewSet for recipe attributes(like tag and ingredient)."""
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -62,18 +60,18 @@ class TagViewSet(mixins.ListModelMixin,
         return self.queryset.filter(user=self.request.user).order_by('-name')
 
 
+# is it also possible to use ModelViewSet
+# idk why the tutorial uses GenericViewSet
+# in combination with mixins this time
+class TagViewSet(BaseRecipeAttrViewSet):
+    """Manage tags in the database."""
 
-class IngredientViewSet(mixins.ListModelMixin,
-                        mixins.UpdateModelMixin,
-                        mixins.DestroyModelMixin,
-                        viewsets.GenericViewSet):
+    serializer_class = serializers.TagSerializer
+    queryset = Tag.objects.all()
+
+
+class IngredientViewSet(BaseRecipeAttrViewSet):
     """Manage Ingredients in the database."""
 
     serializer_class = serializers.IngredientSerializer
     queryset = Ingredient.objects.all()
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        """Retrieve Ingredients for authenticated user."""
-        return self.queryset.filter(user=self.request.user).order_by('-name')
